@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game Search API Test</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 2em; }
+  label { margin-right: 0.5em; }
+  input { margin-right: 1em; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background-color: #f4f4f4; }
+</style>
+</head>
+<body>
+  <h1>Game Search API Test</h1>
+
+  <form id="searchForm">
+    <label>
+      Name contains:
+      <input type="text" id="name" placeholder="e.g. Zelda" />
+    </label>
+    <label>
+      Release Year:
+      <input type="number" id="releaseYear" min="1950" max="2100" />
+    </label>
+    <label>
+      Genre:
+      <input type="text" id="genre" placeholder="e.g. Adventure" />
+    </label>
+    <button type="submit">Search</button>
+    <button type="button" id="clearBtn">Clear</button>
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const resultsDiv = document.getElementById('results');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function buildQuery(params) {
+      const esc = encodeURIComponent;
+      return Object.keys(params)
+        .filter(k => params[k] !== "" && params[k] !== null)
+        .map(k => esc(k) + '=' + esc(params[k]))
+        .join('&');
+    }
+
+    function renderResults(games) {
+      if (games.length === 0) {
+        resultsDiv.innerHTML = '<p>No games found.</p>';
+        return;
+      }
+
+      let html = `<table>
+        <thead>
+          <tr><th>Name</th><th>Release Year</th><th>Genre</th></tr>
+        </thead>
+        <tbody>`;
+
+      games.forEach(game => {
+        html += `<tr>
+          <td>${game.name}</td>
+          <td>${game.releaseYear}</td>
+          <td>${game.genre}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+
+      resultsDiv.innerHTML = html;
+    }
+
+    async function searchGames(params) {
+      const queryString = buildQuery(params);
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/games?${queryString}`);
+        if (!response.ok) {
+          resultsDiv.innerHTML = `<p>Error: ${response.status} ${response.statusText}</p>`;
+          return;
+        }
+        const data = await response.json();
+        renderResults(data);
+      } catch (error) {
+        resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const params = {
+        name: document.getElementById('name').value.trim(),
+        releaseYear: document.getElementById('releaseYear').value.trim(),
+        genre: document.getElementById('genre').value.trim(),
+      };
+      searchGames(params);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      form.reset();
+      resultsDiv.innerHTML = '';
+    });
+  </script>
+</body>
+</html>
+
