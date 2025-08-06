@@ -58,24 +58,14 @@ The microservice responds with a JSON array containing game objects that match t
 
 If no games match, the response will be an empty array `[]`.
 
-HTTP status code will be `200 OK` on success.
+HTTP status code will be 200 OK on success.
 
 **UML Sequence Diagram**
 
 Below is a simplified UML sequence diagram describing the interaction between the Client (your code) and the Game Search Microservice:
 
-```
-Client          API Server (FastAPI)
-  |                     |
-  |---- HTTP GET /games?name=zelda&releaseYear=2017 -->|
-  |                     |
-  |         (Server reads query params)               |
-  |         (Server filters in-memory JSON data)      |
-  |                     |
-  |<--- HTTP 200 OK + JSON array of matching games ----|
-  |                     |
-  |       (Client parses JSON and uses data)          |
-```
+![API Sequence Diagram](./microservice_a_sequence_diagram.drawio.png)
+
 
 **Step-by-step:**
 
